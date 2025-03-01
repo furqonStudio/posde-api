@@ -20,7 +20,6 @@ class CategoryRequest extends FormRequest
 
         return [
             'name' => [
-                'bail',
                 'required',
                 'string',
                 'min:3',
@@ -46,7 +45,7 @@ class CategoryRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => 'Validasi gagal',
-            'errors' => $validator->errors()->first(),
+            'errors' => $validator->errors(),
         ], 422));
     }
 }

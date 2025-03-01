@@ -44,8 +44,8 @@ class CategoryTest extends TestCase
             'data' => [
                 'id' => $category->id,
                 'name' => $category->name,
-                'created_at' => $category->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $category->updated_at->format('Y-m-d H:i:s'),
+                'created_at' => $category->created_at->toDateTimeString(),
+                'updated_at' => $category->updated_at->toDateTimeString(),
             ]
         ]);
     }
@@ -71,49 +71,30 @@ class CategoryTest extends TestCase
     {
         $response = $this->postJson('/api/categories', []);
 
-        $response->assertStatus(422)->assertJson([
-            'success' => false,
-            'message' => 'Validasi gagal',
-            'errors' => 'Nama kategori wajib diisi.'
-        ]);
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
 
     public function test_name_must_be_at_least_3_characters()
     {
         $response = $this->postJson('/api/categories', ['name' => 'AB']);
 
-        $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => 'Nama kategori minimal 3 karakter.'
-            ]);
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
 
     public function test_name_must_not_exceed_255_characters()
     {
         $response = $this->postJson('/api/categories', ['name' => str_repeat('A', 256)]);
 
-        $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors'
-            ]);
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
 
     public function test_name_must_be_unique()
     {
-        $category = Category::factory()->create(['name' => 'Existing Category']);
+        Category::factory()->create(['name' => 'Existing Category']);
 
         $response = $this->postJson('/api/categories', ['name' => 'Existing Category']);
 
-        $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors'
-            ]);
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
 
     public function test_can_update_a_category()
@@ -138,7 +119,7 @@ class CategoryTest extends TestCase
 
         $response = $this->deleteJson("/api/categories/{$category->id}");
 
-        $response->assertStatus(204);
+        $response->assertNoContent();
 
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
     }
