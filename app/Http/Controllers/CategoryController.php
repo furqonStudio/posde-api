@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\PaginationResource;
 use Illuminate\Http\JsonResponse;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -14,8 +15,11 @@ class CategoryController extends BaseController
     public function index(): JsonResponse
     {
         try {
-            $categories = Category::all();
-            return $this->successResponse(CategoryResource::collection($categories), 'Daftar kategori berhasil diambil');
+            $categories = Category::paginate(10);
+            return $this->successResponse(
+                new PaginationResource(CategoryResource::collection($categories)),
+                'Daftar kategori berhasil diambil'
+            );
         } catch (Exception $e) {
             Log::error('Gagal mengambil kategori: ' . $e->getMessage());
             return $this->errorResponse('Gagal mengambil kategori', 500);
