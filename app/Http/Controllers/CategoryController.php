@@ -79,9 +79,6 @@ class CategoryController extends BaseController
             return $this->successResponse(null, 'Kategori berhasil dihapus', 200);
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse('Kategori dengan ID ' . $id . ' tidak ditemukan', 404);
-        } catch (QueryException $e) {
-            Log::error("Gagal menghapus kategori dengan ID {$id} karena terhubung dengan data lain: " . $e->getMessage());
-            return $this->errorResponse('Kategori tidak dapat dihapus karena masih digunakan di data lain', 409);
         } catch (Exception $e) {
             Log::error("Gagal menghapus kategori dengan ID {$id}: " . $e->getMessage());
             return $this->errorResponse('Gagal menghapus kategori', 500);

@@ -1,8 +1,10 @@
 <?php
 
-use App\Models\Category;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CategoryTest extends TestCase
 {
@@ -13,6 +15,7 @@ class CategoryTest extends TestCase
         Category::factory()->count(5)->create();
 
         $response = $this->getJson('/api/categories');
+
         $response->assertStatus(200)->assertJsonStructure([
             'success',
             'message',
@@ -50,6 +53,16 @@ class CategoryTest extends TestCase
         ]);
     }
 
+    public function test_returns_404_if_category_not_found()
+    {
+        $response = $this->getJson('/api/categories/999');
+
+        $response->assertStatus(404)->assertJson([
+            'success' => false,
+            'message' => 'Kategori dengan ID 999 tidak ditemukan'
+        ]);
+    }
+
     public function test_can_create_a_category()
     {
         $data = ['name' => 'New Category'];
@@ -59,9 +72,7 @@ class CategoryTest extends TestCase
         $response->assertStatus(201)->assertJson([
             'success' => true,
             'message' => 'Kategori berhasil ditambahkan',
-            'data' => [
-                'name' => 'New Category'
-            ]
+            'data' => ['name' => 'New Category']
         ]);
 
         $this->assertDatabaseHas('categories', $data);
@@ -113,14 +124,74 @@ class CategoryTest extends TestCase
         $this->assertDatabaseHas('categories', $data);
     }
 
+    public function test_update_category_not_found()
+    {
+        $response = $this->putJson('/api/categories/999', ['name' => 'Updated']);
+
+        $response->assertStatus(404)->assertJson([
+            'success' => false,
+            'message' => 'Kategori dengan ID 999 tidak ditemukan'
+        ]);
+    }
+
+    public function test_update_requires_name()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->putJson("/api/categories/{$category->id}", []);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
+    public function test_update_name_must_be_at_least_3_characters()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->putJson("/api/categories/{$category->id}", ['name' => 'AB']);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
+    public function test_update_name_must_not_exceed_255_characters()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->putJson("/api/categories/{$category->id}", ['name' => str_repeat('A', 256)]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
+    public function test_update_name_must_be_unique()
+    {
+        Category::factory()->create(['name' => 'Existing Category']);
+        $category = Category::factory()->create();
+
+        $response = $this->putJson("/api/categories/{$category->id}", ['name' => 'Existing Category']);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
     public function test_can_delete_a_category()
     {
         $category = Category::factory()->create();
 
         $response = $this->deleteJson("/api/categories/{$category->id}");
 
-        $response->assertNoContent();
+        $response->assertStatus(200)->assertJson([
+            'success' => true,
+            'message' => 'Kategori berhasil dihapus'
+        ]);
 
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
+
+    public function test_delete_category_not_found()
+    {
+        $response = $this->deleteJson('/api/categories/999');
+
+        $response->assertStatus(404)->assertJson([
+            'success' => false,
+            'message' => 'Kategori dengan ID 999 tidak ditemukan'
+        ]);
     }
 }
