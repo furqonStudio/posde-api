@@ -8,6 +8,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PaginationResource;
 use Illuminate\Http\JsonResponse;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 
 class CategoryController extends BaseController
@@ -48,13 +49,20 @@ class CategoryController extends BaseController
         }
     }
 
-    public function update(CategoryRequest $request, Category $category): JsonResponse
+    public function update(CategoryRequest $request,  $id): JsonResponse
     {
         try {
+            $category = Category::findOrFail($id);
+            if ($category->name === $request->input('name')) {
+                return $this->errorResponse('Tidak ada perubahan data', 422);
+            }
+
             $category->update($request->validated());
             return $this->successResponse(new CategoryResource($category), 'Kategori berhasil diperbarui');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Kategori dengan ID ' . $id . ' tidak ditemukan', 404);
         } catch (Exception $e) {
-            Log::error("Gagal memperbarui kategori dengan ID {$category->id}: " . $e->getMessage());
+            Log::error("Gagal memperbarui kategori: " . $e->getMessage());
             return $this->errorResponse('Gagal memperbarui kategori', 500);
         }
     }

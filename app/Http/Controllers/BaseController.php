@@ -20,7 +20,6 @@ class BaseController extends Controller
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => null,
         ], $status);
     }
 }
