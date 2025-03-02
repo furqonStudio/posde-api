@@ -12,6 +12,7 @@ class PaginationResource extends ResourceCollection
     public function __construct($resource)
     {
         parent::__construct($resource);
+
         $this->pagination = [
             'current_page' => $resource->currentPage(),
             'last_page' => $resource->lastPage(),

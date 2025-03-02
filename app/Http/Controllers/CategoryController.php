@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\CategoryRequest;
+use Illuminate\Database\QueryException;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PaginationResource;
-use Illuminate\Http\JsonResponse;
-use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
 
 class CategoryController extends BaseController
 {
@@ -43,9 +44,11 @@ class CategoryController extends BaseController
         try {
             $category = Category::findOrFail($id);
             return $this->successResponse(new CategoryResource($category), 'Detail kategori berhasil diambil');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Kategori dengan ID $id tidak ditemukan", 404);
         } catch (Exception $e) {
-            Log::error("Kategori dengan ID $id tidak ditemukan: " . $e->getMessage());
-            return $this->errorResponse('Kategori tidak ditemukan', 404);
+            Log::error("Gagal mengambil kategori dengan ID $id: " . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil kategori', 500);
         }
     }
 
@@ -67,13 +70,20 @@ class CategoryController extends BaseController
         }
     }
 
-    public function destroy(Category $category): JsonResponse
+    public function destroy($id): JsonResponse
     {
         try {
+            $category = Category::findOrFail($id);
+
             $category->delete();
-            return $this->successResponse(null, 'Kategori berhasil dihapus', 204);
+            return $this->successResponse(null, 'Kategori berhasil dihapus', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Kategori dengan ID ' . $id . ' tidak ditemukan', 404);
+        } catch (QueryException $e) {
+            Log::error("Gagal menghapus kategori dengan ID {$id} karena terhubung dengan data lain: " . $e->getMessage());
+            return $this->errorResponse('Kategori tidak dapat dihapus karena masih digunakan di data lain', 409);
         } catch (Exception $e) {
-            Log::error("Gagal menghapus kategori dengan ID {$category->id}: " . $e->getMessage());
+            Log::error("Gagal menghapus kategori dengan ID {$id}: " . $e->getMessage());
             return $this->errorResponse('Gagal menghapus kategori', 500);
         }
     }
