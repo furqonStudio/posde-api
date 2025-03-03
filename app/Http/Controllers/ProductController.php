@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use Exception;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Http\Requests\ProductRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\PaginationResource;
@@ -27,7 +28,7 @@ class ProductController extends BaseController
         }
     }
 
-    public function store(ProductRequest $request): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
         try {
             $product = Product::create($request->validated());
@@ -51,7 +52,7 @@ class ProductController extends BaseController
         }
     }
 
-    public function update(ProductRequest $request, $id): JsonResponse
+    public function update(UpdateProductRequest $request, $id): JsonResponse
     {
         try {
             $product = Product::findOrFail($id);
