@@ -8,10 +8,8 @@ class ProductRequest extends FormRequest
 {
     public function rules(): array
     {
-        $id = $this->route('product')?->id;
-
         return [
-            'name' => 'required|string|unique:products,name,' . $id,
+            'name' => 'required|string|unique:products,name,' . $this->product,
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
