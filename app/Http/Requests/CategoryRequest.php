@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class CategoryRequest extends FormRequest
+class CategoryRequest extends BaseRequest
 {
     public function rules(): array
     {
