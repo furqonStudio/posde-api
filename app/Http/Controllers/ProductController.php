@@ -2,50 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Requests\ProductRequest;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\PaginationResource;
 
-class ProductController extends Controller
+class ProductController extends BaseController
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        return response()->json(Product::with('category')->get());
+        try {
+            $products = Product::with('category')->paginate(10);
+            return $this->successResponse(
+                new PaginationResource(ProductResource::collection($products)),
+                'Daftar produk berhasil diambil'
+            );
+        } catch (Exception $e) {
+            Log::error('Gagal mengambil produk: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil produk', 500);
+        }
     }
 
-    public function store(Request $request)
+    public function store(ProductRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|unique:products',
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer',
-        ]);
-
-        $product = Product::create($request->all());
-        return response()->json($product, 201);
+        try {
+            $product = Product::create($request->validated());
+            return $this->successResponse(new ProductResource($product), 'Produk berhasil ditambahkan', 201);
+        } catch (Exception $e) {
+            Log::error('Gagal menambahkan produk: ' . $e->getMessage());
+            return $this->errorResponse('Gagal menambahkan produk', 500);
+        }
     }
 
-    public function show(Product $product)
+    public function show($id): JsonResponse
     {
-        return response()->json($product->load('category'));
+        try {
+            $product = Product::with('category')->findOrFail($id);
+            return $this->successResponse(new ProductResource($product), 'Detail produk berhasil diambil');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Produk dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal mengambil produk dengan ID $id: " . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil produk', 500);
+        }
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, $id): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|unique:products,name,' . $product->id,
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer',
-        ]);
+        try {
+            $product = Product::findOrFail($id);
+            if (
+                $product->name === $request->input('name') && $product->category_id === $request->input('category_id') &&
+                $product->price == $request->input('price') && $product->stock == $request->input('stock')
+            ) {
+                return $this->errorResponse('Tidak ada perubahan data', 422);
+            }
 
-        $product->update($request->all());
-        return response()->json($product);
+            $product->update($request->validated());
+            return $this->successResponse(new ProductResource($product), 'Produk berhasil diperbarui');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Produk dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal memperbarui produk: " . $e->getMessage());
+            return $this->errorResponse('Gagal memperbarui produk', 500);
+        }
     }
 
-    public function destroy(Product $product)
+    public function destroy($id): JsonResponse
     {
-        $product->delete();
-        return response()->json(null, 204);
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
+            return $this->successResponse(null, 'Produk berhasil dihapus', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Produk dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal menghapus produk dengan ID $id: " . $e->getMessage());
+            return $this->errorResponse('Gagal menghapus produk', 500);
+        }
     }
 }

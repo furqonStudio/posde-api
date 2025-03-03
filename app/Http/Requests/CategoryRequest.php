@@ -9,11 +9,6 @@ use Illuminate\Validation\Rule;
 
 class CategoryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [
@@ -36,14 +31,5 @@ class CategoryRequest extends FormRequest
             'name.max' => 'Nama kategori maksimal 255 karakter.',
             'name.unique' => 'Nama kategori sudah digunakan.',
         ];
-    }
-
-    function failedValidation(ValidationValidator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'success' => false,
-            'message' => 'Validasi gagal',
-            'errors' => $validator->errors(),
-        ], 422));
     }
 }
