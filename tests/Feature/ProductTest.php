@@ -82,11 +82,55 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', $data);
     }
 
-    public function test_requires_name_and_category_id_to_create_a_product()
+    public function test_requires_name_category_price_and_stock_to_create_a_product()
     {
         $response = $this->postJson('/api/products', []);
 
-        $response->assertStatus(422)->assertJsonValidationErrors(['name', 'category_id']);
+        $response->assertStatus(422)->assertJsonValidationErrors(['name', 'category_id', 'price', 'stock']);
+    }
+
+    public function test_price_and_stock_must_be_numeric()
+    {
+        $category = Category::factory()->create();
+        $data = [
+            'name' => 'Invalid Product',
+            'category_id' => $category->id,
+            'price' => 'abc',
+            'stock' => 'xyz'
+        ];
+
+        $response = $this->postJson('/api/products', $data);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['price', 'stock']);
+    }
+
+    public function test_price_and_stock_must_be_non_negative()
+    {
+        $category = Category::factory()->create();
+        $data = [
+            'name' => 'Invalid Product',
+            'category_id' => $category->id,
+            'price' => -100,
+            'stock' => -5
+        ];
+
+        $response = $this->postJson('/api/products', $data);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['price', 'stock']);
+    }
+
+    public function test_category_must_exist()
+    {
+        $data = [
+            'name' => 'Invalid Product',
+            'category_id' => 9999,
+            'price' => 1000,
+            'stock' => 5
+        ];
+
+        $response = $this->postJson('/api/products', $data);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['category_id']);
     }
 
     public function test_can_update_a_product()
