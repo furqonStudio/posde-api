@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Category\CategoryRequest;
 use Exception;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Http\Requests\CategoryRequest;
-use Illuminate\Database\QueryException;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PaginationResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
