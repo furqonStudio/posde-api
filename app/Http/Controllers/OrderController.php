@@ -2,79 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Order\StoreOrderRequest;
+use App\Http\Requests\Order\UpdateOrderRequest;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Product;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\PaginationResource;
+use App\Services\OrderService;
+use Exception;
 
-class OrderController extends Controller
+class OrderController extends BaseController
 {
-    public function index()
+    private OrderService $orderService;
+
+    public function __construct(OrderService $orderService)
     {
-        return response()->json(Order::with('items.product')->get());
+        $this->orderService = $orderService;
     }
 
-    public function store(Request $request)
+    public function index(): JsonResponse
     {
-        $request->validate([
-            'items' => 'required|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
-        DB::beginTransaction();
         try {
-            $totalPrice = 0;
-            $order = Order::create(['total_price' => 0, 'status' => 'pending']);
-
-            foreach ($request->items as $item) {
-                $product = Product::find($item['product_id']);
-
-                if ($product->stock < $item['quantity']) {
-                    return response()->json(['error' => 'Stock not enough'], 400);
-                }
-
-                $subtotal = $product->price * $item['quantity'];
-                $totalPrice += $subtotal;
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $item['quantity'],
-                    'price' => $product->price,
-                    'subtotal' => $subtotal,
-                ]);
-
-                $product->decrement('stock', $item['quantity']);
-            }
-
-            $order->update(['total_price' => $totalPrice]);
-            DB::commit();
-
-            return response()->json($order->load('items.product'), 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to create order'], 500);
+            $orders = Order::with('orderItems.product')->paginate(10);
+            return $this->successResponse(
+                new PaginationResource(OrderResource::collection($orders)),
+                'Daftar pesanan berhasil diambil'
+            );
+        } catch (Exception $e) {
+            Log::error('Gagal mengambil pesanan: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil pesanan', 500);
         }
     }
 
-    public function show(Order $order)
+    public function store(StoreOrderRequest $request): JsonResponse
     {
-        return response()->json($order->load('items.product'));
+        try {
+            $order = $this->orderService->createOrder($request->validated());
+            return $this->successResponse(new OrderResource($order->load('orderItems.product')), 'Pesanan berhasil dibuat', 201);
+        } catch (Exception $e) {
+            Log::error('Gagal membuat pesanan: ' . $e->getMessage());
+            return $this->errorResponse('Gagal membuat pesanan', 500);
+        }
     }
 
-    public function update(Request $request, Order $order)
+    public function show($id): JsonResponse
     {
-        $request->validate(['status' => 'required|string']);
-        $order->update(['status' => $request->status]);
-
-        return response()->json($order);
+        try {
+            $order = Order::with('orderItems.product')->findOrFail($id);
+            return $this->successResponse(new OrderResource($order), 'Detail pesanan berhasil diambil');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Pesanan dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal mengambil pesanan dengan ID $id: " . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil pesanan', 500);
+        }
     }
 
-    public function destroy(Order $order)
+    public function update(UpdateOrderRequest $request, $id): JsonResponse
     {
-        $order->delete();
-        return response()->json(null, 204);
+        try {
+            $order = Order::findOrFail($id);
+
+            $validatedData = $request->validated();
+
+            $order->update($validatedData);
+
+            return $this->successResponse(new OrderResource($order), 'Pesanan berhasil diperbarui');
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Pesanan dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal memperbarui pesanan: " . $e->getMessage());
+            return $this->errorResponse('Gagal memperbarui pesanan', 500);
+        }
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        try {
+            $order = Order::findOrFail($id);
+            $order->delete();
+            return $this->successResponse(null, 'Pesanan berhasil dihapus', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Pesanan dengan ID $id tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal menghapus pesanan dengan ID $id: " . $e->getMessage());
+            return $this->errorResponse('Gagal menghapus pesanan', 500);
+        }
     }
 }

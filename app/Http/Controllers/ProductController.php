@@ -56,13 +56,6 @@ class ProductController extends BaseController
     {
         try {
             $product = Product::findOrFail($id);
-            if (
-                $product->name === $request->input('name') && $product->category_id === $request->input('category_id') &&
-                $product->price == $request->input('price') && $product->stock == $request->input('stock')
-            ) {
-                return $this->errorResponse('Tidak ada perubahan data', 422);
-            }
-
             $product->update($request->validated());
             return $this->successResponse(new ProductResource($product), 'Produk berhasil diperbarui');
         } catch (ModelNotFoundException $e) {

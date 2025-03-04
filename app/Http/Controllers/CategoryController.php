@@ -55,10 +55,6 @@ class CategoryController extends BaseController
     {
         try {
             $category = Category::findOrFail($id);
-            if ($category->name === $request->input('name')) {
-                return $this->errorResponse('Tidak ada perubahan data', 422);
-            }
-
             $category->update($request->validated());
             return $this->successResponse(new CategoryResource($category), 'Kategori berhasil diperbarui');
         } catch (ModelNotFoundException $e) {

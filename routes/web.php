@@ -10,9 +10,3 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::prefix('api')->group(function () {
-    Route::apiResource('orders', OrderController::class);
-    Route::apiResource('order-items', OrderItemController::class);
-    Route::apiResource('payments', PaymentController::class);
-});
