@@ -10,13 +10,23 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PaginationResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class CategoryController extends BaseController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $categories = Category::paginate(10);
+            $perPage = intval($request->query('per_page', 10));
+
+            if ($perPage < 1) {
+                $perPage = 10;
+            } elseif ($perPage > 100) {
+                $perPage = 100;
+            }
+
+            $categories = Category::with('products')->paginate($perPage);
+
             return $this->successResponse(
                 new PaginationResource(CategoryResource::collection($categories)),
                 'Daftar kategori berhasil diambil'
