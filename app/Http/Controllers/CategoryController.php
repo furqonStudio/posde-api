@@ -51,7 +51,7 @@ class CategoryController extends BaseController
     public function show($id): JsonResponse
     {
         try {
-            $category = Category::findOrFail($id);
+            $category = Category::with('products')->findOrFail($id);
             return $this->successResponse(new CategoryResource($category), 'Detail kategori berhasil diambil');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Kategori dengan ID $id tidak ditemukan", 404);
