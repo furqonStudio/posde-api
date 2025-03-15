@@ -18,7 +18,8 @@ class ProductFactory extends Factory
         return [
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
             'name' => $this->faker->sentence(2),
-            'price' => $this->faker->randomFloat(2, 10, 500),
+            'description' => $this->faker->paragraph,
+            'price' => $this->faker->numberBetween(10000, 500000),
             'stock' => $this->faker->numberBetween(1, 100),
         ];
     }
