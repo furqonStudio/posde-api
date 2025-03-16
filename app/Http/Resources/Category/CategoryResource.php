@@ -12,7 +12,7 @@ class CategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'products' => ProductResource::collection($this->whenLoaded('products')),
+            'products' => ProductSimpleResource::collection($this->whenLoaded('products')),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];
