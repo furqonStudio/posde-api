@@ -15,11 +15,23 @@ class PaymentFactory extends Factory
 
     public function definition(): array
     {
+        $amount = fake()->numberBetween(50, 1000);
+        $method = fake()->randomElement(['cash', 'cashless']);
+
+
+        $paidAmount = $method === 'cash'
+            ? fake()->numberBetween($amount, $amount + 500)
+            : $amount;
+
+        $change = $method === 'cash' ? max(0, $paidAmount - $amount) : 0;
+
         return [
             'order_id' => Order::factory(),
-            'amount' => $this->faker->randomFloat(2, 50, 1000),
-            'status' => $this->faker->randomElement(['pending', 'paid', 'failed']),
-            'method' => fake()->randomElement(['cash', 'cashless']),
+            'amount' => $amount,
+            'paid_amount' => $paidAmount,
+            'change' => $change,
+            'status' => fake()->randomElement(['pending', 'paid', 'failed']),
+            'method' => $method,
         ];
     }
 }

@@ -16,11 +16,13 @@ class PaymentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            "method" => $this->method,
-            "amount" => $this->amount,
-            "status" => $this->status,
-            "created_at" => $this->created_at->toDateTimeString(),
-            "updated_at" => $this->updated_at->toDateTimeString()
+            'method' => $this->method,
+            'amount' => $this->amount,
+            'status' => $this->status,
+            'paid_amount' => $this->paid_amount,
+            'change' => $this->change,
+            'created_at' => $this->created_at->toDateTimeString(),
+            'updated_at' => $this->updated_at->toDateTimeString()
         ];
     }
 }
