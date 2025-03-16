@@ -16,6 +16,5 @@ class OrderItemResource extends JsonResource
             'subtotal' => $this->subtotal,
             'product' => new ProductSimpleResource($this->whenLoaded('product')),
         ];
-        return parent::toArray($request);
     }
 }
