@@ -50,7 +50,7 @@ class OrderController extends BaseController
     public function show($id): JsonResponse
     {
         try {
-            $order = Order::with('orderItems.product')->findOrFail($id);
+            $order = Order::with('orderItems.product')->with('payment')->findOrFail($id);
             return $this->successResponse(new OrderResource($order), 'Detail pesanan berhasil diambil');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Pesanan dengan ID $id tidak ditemukan", 404);

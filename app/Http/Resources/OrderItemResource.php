@@ -9,11 +9,12 @@ class OrderItemResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
-            'product' => new ProductResource($this->whenLoaded('product')),
-            'quantity' => $this->quantity,
-            'price' => $this->price,
-            'subtotal' => $this->subtotal,
-        ];
+        // return [
+        //     'product' => new ProductResource($this->whenLoaded('product')),
+        //     'quantity' => $this->quantity,
+        //     'price' => $this->price,
+        //     'subtotal' => $this->subtotal,
+        // ];
+        return parent::toArray($request);
     }
 }
