@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Category\CategoryRequest;
 use Exception;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PaginationResource;
+use App\Http\Requests\Category\CategoryRequest;
+use App\Http\Resources\Category\CategoryResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 
 class CategoryController extends BaseController
 {

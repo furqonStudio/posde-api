@@ -9,8 +9,8 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Resources\ProductResource;
 use App\Http\Resources\PaginationResource;
+use App\Http\Resources\Product\ProductResource;
 
 class ProductController extends BaseController
 {
