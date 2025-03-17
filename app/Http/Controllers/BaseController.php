@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PaginationResource;
 use Illuminate\Http\JsonResponse;
 
-class BaseController extends Controller
+class BaseController
 {
     protected function successResponse($data, string $message, int $status = 200): JsonResponse
     {
