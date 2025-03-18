@@ -11,13 +11,22 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\PaginationResource;
 use App\Http\Resources\Product\ProductResource;
+use Illuminate\Http\Request;
 
 class ProductController extends BaseController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $products = Product::with('category')->paginate(10);
+            $perPage = intval($request->query('per_page', 10));
+
+            if ($perPage < 1) {
+                $perPage = 10;
+            } elseif ($perPage > 100) {
+                $perPage = 100;
+            }
+
+            $products = Product::with('category')->paginate($perPage);
             return $this->successResponse(
                 new PaginationResource(ProductResource::collection($products)),
                 'Daftar produk berhasil diambil'

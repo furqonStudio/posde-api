@@ -12,6 +12,7 @@ use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaginationResource;
 use App\Services\OrderService;
 use Exception;
+use Illuminate\Http\Request;
 
 class OrderController extends BaseController
 {
@@ -22,10 +23,19 @@ class OrderController extends BaseController
         $this->orderService = $orderService;
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $orders = Order::with('orderItems.product')->paginate(10);
+
+            $perPage = intval($request->query('per_page', 10));
+
+            if ($perPage < 1) {
+                $perPage = 10;
+            } elseif ($perPage > 100) {
+                $perPage = 100;
+            }
+
+            $orders = Order::with('orderItems.product')->paginate($perPage);
             return $this->successResponse(
                 new PaginationResource(OrderResource::collection($orders)),
                 'Daftar pesanan berhasil diambil'
