@@ -16,6 +16,7 @@ class Store extends Model
         'email',
         'address',
         'phone',
+        'business_type',
     ];
 
     protected $guarded = [];
