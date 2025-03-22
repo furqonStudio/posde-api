@@ -5,7 +5,7 @@ namespace App\Http\Requests\Store;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
-class StoreStoreRequest extends BaseRequest
+class UpdateStoreRequest extends BaseRequest
 {
     use StoreValidationMessages;
 
