@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -32,25 +33,27 @@ class AuthController extends BaseController
         }
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            $validated = $request->validated();
 
-        $user = User::where('email', $validated['email'])->first();
+            $user = User::where('email', $validated['email'])->first();
 
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
-            return $this->errorResponse('Invalid credentials. Please try again.', 401);
+            if (!$user || !Hash::check($validated['password'], $user->password)) {
+                return $this->errorResponse('Invalid credentials. Please try again.', 401);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse([
+                'user' => new UserResource($user),
+                'token' => $token,
+            ], 'Login successful');
+        } catch (Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return $this->errorResponse('Failed to process login', 500);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return $this->successResponse([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ], 'Login successful');
     }
 
     public function logout(Request $request): JsonResponse
