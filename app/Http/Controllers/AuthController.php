@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
@@ -38,30 +39,23 @@ class AuthController extends BaseController
     // 2. Login
     public function login(Request $request): JsonResponse
     {
-        try {
-            $validated = $request->validate([
-                'email' => 'required|string|email',
-                'password' => 'required|string',
-            ]);
+        $validated = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
 
-            $user = User::where('email', $validated['email'])->first();
+        $user = User::where('email', $validated['email'])->first();
 
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
-                return $this->errorResponse('The provided credentials are incorrect.', 401);
-            }
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            return $this->successResponse([
-                'user' => $user,
-                'token' => $token,
-            ], 'Login successful');
-        } catch (ValidationException $e) {
-            return $this->errorResponse('Invalid input', 422, $e->errors());
-        } catch (Exception $e) {
-            Log::error('Login failed: ' . $e->getMessage());
-            return $this->errorResponse('Failed to login', 500);
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return $this->errorResponse('Invalid credentials. Please try again.', 401);
         }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->successResponse([
+            'user' => new UserResource($user),
+            'token' => $token,
+        ], 'Login successful');
     }
 
     // 3. Logout
