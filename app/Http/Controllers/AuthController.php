@@ -59,22 +59,12 @@ class AuthController extends BaseController
     public function logout(Request $request): JsonResponse
     {
         try {
-            // Hapus semua token user
-            $request->user()->tokens()->delete();
+            $request->user()->currentAccessToken()->delete();
 
             return $this->successResponse(null, 'Logged out successfully');
         } catch (Exception $e) {
             Log::error('Logout error: ' . $e->getMessage());
             return $this->errorResponse('Failed to logout', 500);
         }
-    }
-
-    // 4. Check if user is logged in
-    public function isLogin(Request $request)
-    {
-        return response()->json([
-            'is_logged_in' => Auth::check(),
-            'user' => Auth::user(),
-        ]);
     }
 }
