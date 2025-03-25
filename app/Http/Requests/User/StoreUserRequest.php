@@ -14,23 +14,24 @@ class StoreUserRequest extends BaseRequest
     {
         return [
             'name' => [
-                'sometimes',
+                'required',
                 'string',
                 'min:3',
                 'max:255',
                 Rule::unique('users', 'name')->ignore($this->user),
             ],
             'email' => [
-                'sometimes',
+                'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->user),
             ],
             'password' => [
-                'sometimes',
+                'required',
                 'string',
                 'min:6',
                 'max:255',
+                'confirmed'
             ],
         ];
     }

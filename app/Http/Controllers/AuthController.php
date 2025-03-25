@@ -4,16 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\User\UserSimpleResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends BaseController
 {
@@ -26,7 +24,7 @@ class AuthController extends BaseController
                 'password' => Hash::make($request->input('password')),
             ]);
 
-            return $this->successResponse(new UserResource($user), 'User registered successfully', 201);
+            return $this->successResponse(new UserSimpleResource($user), 'User registered successfully', 201);
         } catch (Exception $e) {
             Log::error('Error registering user: ' . $e->getMessage());
             return $this->errorResponse('Failed to register user', 500);
@@ -47,7 +45,7 @@ class AuthController extends BaseController
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return $this->successResponse([
-                'user' => new UserResource($user),
+                'user' => new UserSimpleResource($user),
                 'token' => $token,
             ], 'Login successful');
         } catch (Exception $e) {

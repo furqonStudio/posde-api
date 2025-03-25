@@ -26,7 +26,7 @@ class UpdateUserRequest extends BaseRequest
                 Rule::unique('stores', 'email')->ignore($this->store),
             ],
             'password' => [
-                'required',
+                'sometimes',
                 'string',
                 'min:6',
                 'max:255',
