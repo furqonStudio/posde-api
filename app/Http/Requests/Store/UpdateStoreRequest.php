@@ -19,22 +19,10 @@ class UpdateStoreRequest extends BaseRequest
                 'max:255',
                 Rule::unique('stores', 'name')->ignore($this->store),
             ],
-            'email' => [
-                'sometimes',
-                'email',
-                'max:255',
-                Rule::unique('stores', 'email')->ignore($this->store),
-            ],
             'address' => [
                 'sometimes',
                 'string',
                 'max:500',
-            ],
-            'phone' => [
-                'sometimes',
-                'string',
-                'max:15',
-                Rule::unique('stores', 'phone')->ignore($this->store),
             ],
             'business_type' => [
                 'sometimes',

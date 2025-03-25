@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\BusinessType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,10 @@ class Store extends Model
     ];
 
     protected $guarded = [];
+
+    protected $casts = [
+        'business_type' => BusinessType::class,
+    ];
 
     public function users()
     {

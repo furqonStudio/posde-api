@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\BusinessType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,10 +19,9 @@ class StoreFactory extends Factory
     {
         return [
             'name' => $this->faker->company,
-            'email' => $this->faker->unique()->safeEmail,
             'address' => $this->faker->address,
-            'phone' => $this->faker->phoneNumber,
-            'business_type' => $this->faker->randomElement(['Retail', 'Wholesale', 'Service']),
+            'business_type' => collect(BusinessType::cases())
+                ->random()->value,
             'created_at' => now(),
             'updated_at' => now(),
         ];
