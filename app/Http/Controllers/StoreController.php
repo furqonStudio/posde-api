@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\PaginationResource;
 use App\Http\Resources\StoreResource;
+use App\Models\User;
 
 class StoreController extends BaseController
 {
@@ -33,6 +34,28 @@ class StoreController extends BaseController
             );
         } catch (Exception $e) {
             Log::error('Gagal mengambil toko: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil toko', 500);
+        }
+    }
+
+    public function getStoresByUser($userId): JsonResponse
+    {
+        try {
+            // Cari user berdasarkan ID
+            $user = User::findOrFail($userId);
+
+            // Ambil semua toko yang dimiliki user
+            $stores = $user->stores()->paginate(10); // Bisa ditambahkan pagination sesuai kebutuhan
+
+            // Return response dengan resource
+            return $this->successResponse(
+                new PaginationResource(StoreResource::collection($stores)),
+                "Daftar toko dari user berhasil diambil"
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("User dengan ID $userId tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal mengambil toko untuk user dengan ID $userId: " . $e->getMessage());
             return $this->errorResponse('Gagal mengambil toko', 500);
         }
     }

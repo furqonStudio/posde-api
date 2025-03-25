@@ -18,8 +18,8 @@ Route::apiResource('products', ProductController::class);
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('stores', StoreController::class);
 Route::apiResource('users', UserController::class);
+Route::get('/users/{userId}/stores', [StoreController::class, 'getStoresByUser']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/is-login', [AuthController::class, 'isLogin'])->middleware('auth:sanctum');
