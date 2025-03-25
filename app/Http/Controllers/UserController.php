@@ -28,7 +28,7 @@ class UserController extends BaseController
                 $perPage = 100;
             }
 
-            $users = User::paginate($perPage);
+            $users = User::with('store')->paginate($perPage);
 
             return $this->successResponse(
                 new PaginationResource(UserResource::collection($users)),
@@ -70,7 +70,7 @@ class UserController extends BaseController
     public function show($id): JsonResponse
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::with('store')->findOrFail($id);
             return $this->successResponse(new UserResource($user), 'Detail pengguna berhasil diambil');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Pengguna dengan ID $id tidak ditemukan", 404);
