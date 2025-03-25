@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\PaginationResource;
+use App\Http\Resources\StoreResource;
 use App\Http\Resources\User\UserResource;
+use App\Models\Store;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -46,7 +48,19 @@ class UserController extends BaseController
 
             $user = User::create($validatedData);
 
-            return $this->successResponse(new UserResource($user), 'Pengguna berhasil ditambahkan', 201);
+            if (empty($validatedData['store_id'])) {
+                return $this->successResponse(
+                    new UserResource($user),
+                    'Pengguna berhasil ditambahkan. Silakan buat atau pilih toko.',
+                    201
+                );
+            }
+
+            return $this->successResponse(
+                new UserResource($user),
+                'Pengguna berhasil ditambahkan',
+                201
+            );
         } catch (Exception $e) {
             Log::error('Gagal menambahkan pengguna: ' . $e->getMessage());
             return $this->errorResponse('Gagal menambahkan pengguna', 500);

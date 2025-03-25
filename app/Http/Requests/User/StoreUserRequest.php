@@ -33,6 +33,7 @@ class StoreUserRequest extends BaseRequest
                 'max:255',
                 'confirmed'
             ],
+            'store_id' => ['nullable', 'exists:stores,id'],
         ];
     }
 }

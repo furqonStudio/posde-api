@@ -38,25 +38,44 @@ class StoreController extends BaseController
         }
     }
 
-    public function getStoresByUser($userId): JsonResponse
+
+    public function getUsersByStore($storeId): JsonResponse
     {
         try {
-            // Cari user berdasarkan ID
-            $user = User::findOrFail($userId);
+            $store = Store::with('users')->findOrFail($storeId);
 
-            // Ambil semua toko yang dimiliki user
-            $stores = $user->stores()->paginate(10); // Bisa ditambahkan pagination sesuai kebutuhan
-
-            // Return response dengan resource
             return $this->successResponse(
-                new PaginationResource(StoreResource::collection($stores)),
-                "Daftar toko dari user berhasil diambil"
+                StoreResource::make($store->load('users')),
+                "Daftar user dari store berhasil diambil"
             );
         } catch (ModelNotFoundException $e) {
-            return $this->errorResponse("User dengan ID $userId tidak ditemukan", 404);
+            return $this->errorResponse("Store dengan ID $storeId tidak ditemukan", 404);
         } catch (Exception $e) {
-            Log::error("Gagal mengambil toko untuk user dengan ID $userId: " . $e->getMessage());
-            return $this->errorResponse('Gagal mengambil toko', 500);
+            Log::error("Gagal mengambil user dari store: " . $e->getMessage());
+            return $this->errorResponse("Gagal mengambil user dari store", 500);
+        }
+    }
+
+
+    public function assignUserToStore(Request $request, $storeId): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            $store = Store::findOrFail($storeId);
+            $user = User::findOrFail($validated['user_id']);
+
+            $user->store_id = $store->id; // Assign store ke user
+            $user->save();
+
+            return $this->successResponse(null, "User berhasil ditambahkan ke store");
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Store atau user tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal menambahkan user ke store: " . $e->getMessage());
+            return $this->errorResponse("Gagal menambahkan user ke store", 500);
         }
     }
 

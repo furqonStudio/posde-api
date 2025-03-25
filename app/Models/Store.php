@@ -23,6 +23,6 @@ class Store extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'store_user');
+        return $this->hasMany(User::class);
     }
 }

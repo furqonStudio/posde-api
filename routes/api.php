@@ -18,7 +18,8 @@ Route::apiResource('products', ProductController::class);
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('stores', StoreController::class);
 Route::apiResource('users', UserController::class);
-Route::get('/users/{userId}/stores', [StoreController::class, 'getStoresByUser']);
+Route::get('/stores/{storeId}/users', [StoreController::class, 'getUsersByStore']);
+Route::post('/stores/{storeId}/assign-user', [StoreController::class, 'assignUserToStore']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

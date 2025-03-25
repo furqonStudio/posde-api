@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'store_id'
     ];
 
     /**
@@ -47,8 +48,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function stores()
+    public function store()
     {
-        return $this->belongsToMany(Store::class, 'store_user');
+        return $this->belongsTo(Store::class)->withDefault();
     }
 }
