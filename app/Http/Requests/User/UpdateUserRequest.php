@@ -31,6 +31,7 @@ class UpdateUserRequest extends BaseRequest
                 'min:6',
                 'max:255',
             ],
+            'store_id' => ['nullable', 'exists:stores,id'],
         ];
     }
 }

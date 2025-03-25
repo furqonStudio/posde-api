@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Store;
 
-use App\BusinessType;
+use App\Enums\BusinessType;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;

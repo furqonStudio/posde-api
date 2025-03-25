@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BusinessType;
 use App\Http\Requests\Store\StoreStoreRequest;
 use App\Http\Requests\Store\UpdateStoreRequest;
 use App\Models\Store;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\PaginationResource;
 use App\Http\Resources\Store\StoreResource;
 use App\Models\User;
+use App\Services\EnumService;
 
 class StoreController extends BaseController
 {
@@ -111,5 +113,11 @@ class StoreController extends BaseController
             Log::error("Gagal menghapus toko dengan ID $id: " . $e->getMessage());
             return $this->errorResponse('Gagal menghapus toko', 500);
         }
+    }
+
+    public function getBusinessTypes()
+    {
+        // return response()->json(EnumService::getBusinessTypes());
+        return response()->json(BusinessType::cases());
     }
 }
