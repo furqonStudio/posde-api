@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\PaginationResource;
-use App\Http\Resources\StoreResource;
+use App\Http\Resources\Store\StoreResource;
 use App\Models\User;
 
 class StoreController extends BaseController
@@ -27,7 +27,7 @@ class StoreController extends BaseController
                 $perPage = 100;
             }
 
-            $stores = Store::paginate($perPage);
+            $stores = Store::with('users')->paginate($perPage);
             return $this->successResponse(
                 new PaginationResource(StoreResource::collection($stores)),
                 'Daftar toko berhasil diambil'
@@ -37,25 +37,6 @@ class StoreController extends BaseController
             return $this->errorResponse('Gagal mengambil toko', 500);
         }
     }
-
-
-    public function getUsersByStore($storeId): JsonResponse
-    {
-        try {
-            $store = Store::with('users')->findOrFail($storeId);
-
-            return $this->successResponse(
-                StoreResource::make($store->load('users')),
-                "Daftar user dari store berhasil diambil"
-            );
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse("Store dengan ID $storeId tidak ditemukan", 404);
-        } catch (Exception $e) {
-            Log::error("Gagal mengambil user dari store: " . $e->getMessage());
-            return $this->errorResponse("Gagal mengambil user dari store", 500);
-        }
-    }
-
 
     public function assignUserToStore(Request $request, $storeId): JsonResponse
     {
@@ -79,6 +60,7 @@ class StoreController extends BaseController
         }
     }
 
+
     public function store(StoreStoreRequest $request): JsonResponse
     {
         try {
@@ -93,7 +75,7 @@ class StoreController extends BaseController
     public function show($id): JsonResponse
     {
         try {
-            $store = Store::findOrFail($id);
+            $store = Store::with('users')->findOrFail($id);
             return $this->successResponse(new StoreResource($store), 'Detail toko berhasil diambil');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Toko dengan ID $id tidak ditemukan", 404);
