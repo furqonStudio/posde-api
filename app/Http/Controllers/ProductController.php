@@ -26,7 +26,8 @@ class ProductController extends BaseController
                 $perPage = 100;
             }
 
-            $products = Product::with('category')->paginate($perPage);
+            $products = Product::with(['category', 'user'])->paginate($perPage);
+
             return $this->successResponse(
                 new PaginationResource(ProductResource::collection($products)),
                 'Daftar produk berhasil diambil'
