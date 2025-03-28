@@ -28,6 +28,13 @@ class UpdateProductRequest extends BaseRequest
                 'mimes:png,jpg',
                 'max:2048'
             ],
+            'name' => [
+                'sometimes',
+                'string',
+                'min:3',
+                'max:255',
+                Rule::unique('products', 'name')->ignore($this->product),
+            ],
             'price' => [
                 'sometimes',
                 'numeric',
