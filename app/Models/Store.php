@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BusinessType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,8 +22,12 @@ class Store extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'business_type' => BusinessType::class,
+    ];
+
     public function users()
     {
-        return $this->belongsToMany(User::class, 'store_user');
+        return $this->hasMany(User::class);
     }
 }

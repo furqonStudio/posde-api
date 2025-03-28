@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
             $table->text('address');
-            $table->string('phone');
             $table->string('business_type');
             $table->timestamps();
         });

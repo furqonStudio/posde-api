@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Store;
+namespace App\Http\Requests\User;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateStoreRequest extends BaseRequest
+class UpdateUserRequest extends BaseRequest
 {
-    use StoreValidationMessages;
+    use UserValidationMessages;
 
     public function rules(): array
     {
@@ -19,16 +19,19 @@ class UpdateStoreRequest extends BaseRequest
                 'max:255',
                 Rule::unique('stores', 'name')->ignore($this->store),
             ],
-            'address' => [
+            'email' => [
+                'sometimes',
+                'email',
+                'max:255',
+                Rule::unique('stores', 'email')->ignore($this->store),
+            ],
+            'password' => [
                 'sometimes',
                 'string',
-                'max:500',
+                'min:6',
+                'max:255',
             ],
-            'business_type' => [
-                'sometimes',
-                'string',
-                'max:100',
-            ],
+            'store_id' => ['nullable', 'exists:stores,id'],
         ];
     }
 }

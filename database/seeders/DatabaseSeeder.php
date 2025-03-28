@@ -19,14 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Store::factory(10)->create()->each(function ($store) {
-            // Ambil beberapa user secara acak untuk dihubungkan ke store
-            $users = User::factory(rand(1, 2))->create();
-
-            // Hubungkan store ke user dengan timestamps
-            $store->users()->attach($users->pluck('id'), [
-                'created_at' => now(),
-                'updated_at' => now(),
+        Store::factory(3)->create()->each(function ($store) {
+            // Buat 1-2 user untuk setiap store
+            User::factory(rand(1, 2))->create([
+                'store_id' => $store->id,
             ]);
         });
         Category::factory(5)->create(); // Buat 5 kategori

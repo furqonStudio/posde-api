@@ -13,16 +13,27 @@ class UpdateProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'category_id' => [
+                'sometimes',
+                Rule::exists('categories', 'id'),
+            ],
+            'user_id' => [
+                'sometimes',
+                Rule::exists('users', 'id'),
+            ],
+            'image' => [
+                'sometimes',
+                'nullable',
+                'image',
+                'mimes:png,jpg',
+                'max:2048'
+            ],
             'name' => [
                 'sometimes',
                 'string',
                 'min:3',
                 'max:255',
                 Rule::unique('products', 'name')->ignore($this->product),
-            ],
-            'category_id' => [
-                'sometimes',
-                Rule::exists('categories', 'id'),
             ],
             'price' => [
                 'sometimes',

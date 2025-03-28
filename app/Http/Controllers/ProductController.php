@@ -26,7 +26,8 @@ class ProductController extends BaseController
                 $perPage = 100;
             }
 
-            $products = Product::with('category')->paginate($perPage);
+            $products = Product::with(['category', 'user'])->paginate($perPage);
+
             return $this->successResponse(
                 new PaginationResource(ProductResource::collection($products)),
                 'Daftar produk berhasil diambil'
@@ -40,7 +41,14 @@ class ProductController extends BaseController
     public function store(StoreProductRequest $request): JsonResponse
     {
         try {
-            $product = Product::create($request->validated());
+            $validated = $request->validated();
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('products', 'public');
+                $validated['image'] = $imagePath;
+            }
+
+            $product = Product::create($validated);
             return $this->successResponse(new ProductResource($product), 'Produk berhasil ditambahkan', 201);
         } catch (Exception $e) {
             Log::error('Gagal menambahkan produk: ' . $e->getMessage());
@@ -65,7 +73,15 @@ class ProductController extends BaseController
     {
         try {
             $product = Product::findOrFail($id);
-            $product->update($request->validated());
+            $validated = $request->validated();
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('products', 'public');
+                $validated['image'] = $imagePath;
+            }
+
+            $product->update($validated);
+
             return $this->successResponse(new ProductResource($product), 'Produk berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Produk dengan ID $id tidak ditemukan", 404);

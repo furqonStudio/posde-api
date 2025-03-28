@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Product;
 
 use App\Http\Resources\Category\CategorySimpleResource;
+use App\Http\Resources\User\UserSimpleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,8 +13,10 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'image' => $this->image,
             'name' => $this->name,
             'category' => new CategorySimpleResource($this->whenLoaded('category')),
+            'user' => new UserSimpleResource($this->whenLoaded('user')),
             'price' => $this->price,
             'stock' => $this->stock,
             "description" => $this->description,

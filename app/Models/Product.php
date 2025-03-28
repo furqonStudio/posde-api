@@ -11,8 +11,15 @@ class Product extends Model
 
     protected $table = 'products';
 
-    protected $fillable = ['category_id', 'name', 'price', 'stock', 'description'];
-
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'image',
+        'name',
+        'price',
+        'stock',
+        'description',
+    ];
     protected $guarded = [];
 
     public function category()
@@ -20,8 +27,19 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // public function getImageAttribute($value)
+    // {
+    //     return $value ? asset('storage/' . $value) : null;
+    // }
 }

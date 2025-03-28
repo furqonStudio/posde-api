@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BusinessType;
 use App\Http\Requests\Store\StoreStoreRequest;
 use App\Http\Requests\Store\UpdateStoreRequest;
 use App\Models\Store;
@@ -11,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\PaginationResource;
-use App\Http\Resources\StoreResource;
+use App\Http\Resources\Store\StoreResource;
+use App\Models\User;
+use App\Services\EnumService;
 
 class StoreController extends BaseController
 {
@@ -26,7 +29,7 @@ class StoreController extends BaseController
                 $perPage = 100;
             }
 
-            $stores = Store::paginate($perPage);
+            $stores = Store::with('users')->paginate($perPage);
             return $this->successResponse(
                 new PaginationResource(StoreResource::collection($stores)),
                 'Daftar toko berhasil diambil'
@@ -36,6 +39,29 @@ class StoreController extends BaseController
             return $this->errorResponse('Gagal mengambil toko', 500);
         }
     }
+
+    public function assignUserToStore(Request $request, $storeId): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            $store = Store::findOrFail($storeId);
+            $user = User::findOrFail($validated['user_id']);
+
+            $user->store_id = $store->id; // Assign store ke user
+            $user->save();
+
+            return $this->successResponse(null, "User berhasil ditambahkan ke store");
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse("Store atau user tidak ditemukan", 404);
+        } catch (Exception $e) {
+            Log::error("Gagal menambahkan user ke store: " . $e->getMessage());
+            return $this->errorResponse("Gagal menambahkan user ke store", 500);
+        }
+    }
+
 
     public function store(StoreStoreRequest $request): JsonResponse
     {
@@ -51,7 +77,7 @@ class StoreController extends BaseController
     public function show($id): JsonResponse
     {
         try {
-            $store = Store::findOrFail($id);
+            $store = Store::with('users')->findOrFail($id);
             return $this->successResponse(new StoreResource($store), 'Detail toko berhasil diambil');
         } catch (ModelNotFoundException $e) {
             return $this->errorResponse("Toko dengan ID $id tidak ditemukan", 404);
@@ -87,5 +113,11 @@ class StoreController extends BaseController
             Log::error("Gagal menghapus toko dengan ID $id: " . $e->getMessage());
             return $this->errorResponse('Gagal menghapus toko', 500);
         }
+    }
+
+    public function getBusinessTypes()
+    {
+        // return response()->json(EnumService::getBusinessTypes());
+        return response()->json(BusinessType::cases());
     }
 }
