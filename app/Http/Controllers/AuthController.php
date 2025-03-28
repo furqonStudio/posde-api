@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -63,6 +64,26 @@ class AuthController extends BaseController
         } catch (Exception $e) {
             Log::error('Logout error: ' . $e->getMessage());
             return $this->errorResponse('Failed to logout', 500);
+        }
+    }
+
+    public function validateToken(Request $request)
+    {
+        try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['message' => 'Token not provided'], 401);
+            }
+
+            // Validasi token menggunakan Sanctum atau JWT
+            $user = Auth::guard('sanctum')->user();
+            if (!$user) {
+                return response()->json(['message' => 'Invalid token'], 401);
+            }
+
+            return response()->json(['message' => 'Token valid'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Invalid token'], 401);
         }
     }
 }
