@@ -16,7 +16,7 @@ class ProductSimpleResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'image' => $this->image,
+            'image' => asset('storage/' . $this->image),
             'name' => $this->name,
             'price' => $this->price,
             'stock' => $this->stock,

@@ -24,7 +24,7 @@ class StoreProductRequest extends BaseRequest
             'image' => [
                 'nullable',
                 'image',
-                'mimes:png,jpg',
+                'mimes:png,jpg,webp',
                 'max:2048'
             ],
             'name' => [

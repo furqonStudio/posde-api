@@ -19,7 +19,7 @@ class ProductFactory extends Factory
         return [
             'category_id' => Category::query()->inRandomOrder()->value('id') ?? Category::factory(),
             'user_id' => User::query()->inRandomOrder()->value('id') ?? User::factory(),
-            'image' => 'https://picsum.photos/480/480?random=' . $this->faker->unique()->numberBetween(1, 1000),
+            'image' => 'images/products/dummy.webp',
             'name' => $this->faker->sentence(2),
             'description' => $this->faker->paragraph,
             'price' => $this->faker->numberBetween(10000, 500000),

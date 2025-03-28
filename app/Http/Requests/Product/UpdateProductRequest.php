@@ -25,7 +25,7 @@ class UpdateProductRequest extends BaseRequest
                 'sometimes',
                 'nullable',
                 'image',
-                'mimes:png,jpg',
+                'mimes:png,jpg,webp',
                 'max:2048'
             ],
             'name' => [

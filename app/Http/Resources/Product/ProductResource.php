@@ -13,7 +13,7 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'image' => $this->image,
+            'image' => asset('storage/' . $this->image),
             'name' => $this->name,
             'category' => new CategorySimpleResource($this->whenLoaded('category')),
             'user' => new UserSimpleResource($this->whenLoaded('user')),
