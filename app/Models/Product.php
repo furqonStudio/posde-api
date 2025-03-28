@@ -38,8 +38,8 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function getImageAttribute($value)
-    {
-        return $value ? asset('storage/' . $value) : null;
-    }
+    // public function getImageAttribute($value)
+    // {
+    //     return $value ? asset('storage/' . $value) : null;
+    // }
 }
