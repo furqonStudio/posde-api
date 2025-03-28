@@ -13,16 +13,26 @@ class StoreProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'category_id' => [
+                'required',
+                Rule::exists('categories', 'id'),
+            ],
+            'user_id' => [
+                'required',
+                Rule::exists('users', 'id'),
+            ],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:png,jpg',
+                'max:2048'
+            ],
             'name' => [
                 'required',
                 'string',
                 'min:3',
                 'max:255',
                 Rule::unique('products', 'name')->ignore($this->product),
-            ],
-            'category_id' => [
-                'required',
-                Rule::exists('categories', 'id'),
             ],
             'price' => [
                 'required',
